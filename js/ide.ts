@@ -866,8 +866,14 @@ class IDE {
       // parse document title from @name in query
       const title_prefix = name_match ? `${name_match[1]} | ` : "";
       ide.waiter.close(title_prefix);
+
+      const base_layer = overpass?.osmLayer?.getBaseLayer?.();
+      if (!base_layer || typeof base_layer.getBounds != "function") {
+        return;
+      }
+
       const map_bounds = ide.map.getBounds();
-      const data_bounds = overpass.osmLayer.getBaseLayer().getBounds();
+      const data_bounds = base_layer.getBounds();
       if (data_bounds.isValid() && !map_bounds.intersects(data_bounds)) {
         // show tooltip for button "zoom to data"
         const prev_content = $(".leaflet-control-buttons-fitdata").tooltip(

@@ -1,3 +1,4 @@
+import * as L from "leaflet";
 import osmtogeojson from "osmtogeojson";
 
 type Options = {
@@ -20,10 +21,28 @@ class OSM4Leaflet extends L.Layer {
     super();
     L.Util.setOptions(this, options);
 
-    this._baseLayer = new this.options.baseLayerClass(
-      null,
-      this.options.baseLayerOptions
-    );
+    // Support both class constructor and factory function for baseLayerClass
+    if (
+      typeof this.options.baseLayerClass === "function" &&
+      this.options.baseLayerClass.prototype &&
+      this.options.baseLayerClass.prototype.addTo
+    ) {
+      // Looks like a class (constructor)
+      this._baseLayer = new this.options.baseLayerClass(
+        null,
+        this.options.baseLayerOptions
+      );
+    } else if (typeof this.options.baseLayerClass === "function") {
+      // Factory function (like createGeoJsonNoVanish)
+      this._baseLayer = this.options.baseLayerClass(
+        null,
+        this.options.baseLayerOptions
+      );
+    } else {
+      throw new Error(
+        "baseLayerClass must be a class constructor or factory function"
+      );
+    }
     this._resultData = null;
     // if data
     if (data) this.addData(data);

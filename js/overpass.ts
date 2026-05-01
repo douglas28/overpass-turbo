@@ -3,7 +3,7 @@ import $ from "jquery";
 import _ from "lodash";
 import "leaflet";
 import configs from "./configs";
-import L_GeoJsonNoVanish from "./GeoJsonNoVanish";
+import {createGeoJsonNoVanish} from "./GeoJsonNoVanish";
 import ide from "./ide";
 import styleparser from "./jsmapcss";
 import {htmlentities} from "./misc";
@@ -495,7 +495,7 @@ class Overpass {
                 afterParse() {
                   overpass.fire("onProgress", "rendering geoJSON");
                 },
-                baseLayerClass: L_GeoJsonNoVanish,
+                baseLayerClass: createGeoJsonNoVanish,
                 query_lang: query_lang,
                 baseLayerOptions: {
                   threshold: 9 * Math.sqrt(2) * 2,

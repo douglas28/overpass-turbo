@@ -21,9 +21,19 @@ import "@fortawesome/fontawesome-free/css/all.css";
 import "bulma/css/bulma.css";
 import "../css/default.css";
 import "../css/compact.css";
+import * as L from "leaflet";
+
 // initialize ide on document ready
 import ide from "./ide";
-$(document).ready(() => ide.init());
+import {initVendzPanels} from "./vendz-panels";
+$(document).ready(() => {
+  ide.init();
+  // expose leaflet globals so vendz-panels can access map & L
+  (window as any).__leaflet_map = ide.map;
+  (window as any).__leaflet_L = L;
+  (window as any).ide = ide;
+  initVendzPanels();
+});
 $(document).ready(initClickHandler);
 
 function initClickHandler() {

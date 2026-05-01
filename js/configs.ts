@@ -2,10 +2,10 @@ export default {
   appname: "overpass-turbo",
   // used for localStorage and openstreetmap.org/api/0.6/user/preferences
   settingNamespace: "overpass-ide",
-  defaultServer: "https://overpass-api.de/api/",
+  defaultServer: "http://localhost:12345/api/",
   // https://wiki.openstreetmap.org/wiki/Overpass_API#Public_Overpass_API_instances
   suggestedServers: [
-    "https://overpass-api.de/api/",
+    "http://localhost:12345/api/",
     "https://overpass-api.de/api/",
     "https://maps.mail.ru/osm/tools/overpass/api/",
     "https://overpass.private.coffee/api/"
@@ -25,9 +25,9 @@ export default {
     //"http://otile1.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.jpg",
   ],
   defaultMapView: {
-    lat: 41.89,
-    lon: 12.492,
-    zoom: 16
+    lat: -41.2865,
+    lon: 174.7762,
+    zoom: 13
   },
   maxMapZoom: 20,
   short_url_service: "",
