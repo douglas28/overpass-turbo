@@ -1672,6 +1672,46 @@ function _blRenderList() {
     return;
   }
   let features = [...blLastGeoJson.features];
+
+  const getDisplayName = (p: any) => {
+    const nzbn = String(p?.nzbn || "").trim();
+    const candidates = [
+      p?.trading_name,
+      p?.company_name,
+      p?.entity_name,
+      p?.name
+    ];
+    for (const raw of candidates) {
+      const value = String(raw ?? "").trim();
+      if (!value) continue;
+      const compact = value.replace(/\s+/g, "");
+      // Avoid showing identifiers (e.g. NZBN) in the Name column.
+      if (nzbn && compact === nzbn) continue;
+      if (/^\d{10,}$/.test(compact)) continue;
+      return value;
+    }
+    return "—";
+  };
+
+  const normalizeWebsiteUrl = (raw: any) => {
+    const value = String(raw ?? "").trim();
+    if (!value) return "";
+    return /^https?:\/\//i.test(value) ? value : `https://${value}`;
+  };
+
+  const websiteCellHtml = (raw: any) => {
+    const value = String(raw ?? "").trim();
+    if (!value) return "—";
+    const href = normalizeWebsiteUrl(value);
+    const label = value.replace(/^https?:\/\//i, "");
+    return `<a href="${escHtml(href)}" target="_blank" rel="noopener noreferrer">${escHtml(label)}</a>`;
+  };
+
+  const phoneCellHtml = (raw: any) => {
+    const value = String(raw ?? "").trim();
+    return value ? escHtml(value) : "—";
+  };
+
   // Sort
   features.sort((a: any, b: any) => {
     const pa = a.properties || {};
@@ -1686,9 +1726,7 @@ function _blRenderList() {
       case "industry":
         return (pa.industry_desc || "").localeCompare(pb.industry_desc || "");
       default:
-        return (pa.trading_name || pa.company_name || "").localeCompare(
-          pb.trading_name || pb.company_name || ""
-        );
+        return getDisplayName(pa).localeCompare(getDisplayName(pb));
     }
   });
 
@@ -1700,7 +1738,7 @@ function _blRenderList() {
   const slice = features.slice(start, start + blPageSize);
 
   let html =
-    "<table><thead><tr><th>Name</th><th>NZBN</th><th>Industry</th><th>Staff</th><th>Region</th><th>Actions</th></tr></thead><tbody>";
+    "<table><thead><tr><th>Name</th><th>NZBN</th><th>Industry</th><th>Staff</th><th>Region</th><th>Website</th><th>Phone</th><th>Actions</th></tr></thead><tbody>";
   slice.forEach((f: any) => {
     const p = f.properties || {};
     const flagged = _vendzFlagged[p.nzbn]
@@ -1708,11 +1746,13 @@ function _blRenderList() {
       : "\uD83D\uDEA9 Flag";
     const flagCls = _vendzFlagged[p.nzbn] ? "flagged" : "";
     html += `<tr>
-      <td>${escHtml(p.trading_name || p.company_name || "—")}</td>
+      <td>${escHtml(getDisplayName(p))}</td>
       <td style="font-family:monospace;font-size:10px;">${escHtml(String(p.nzbn || "—"))}</td>
       <td>${escHtml(p.industry_desc || "—")}</td>
       <td>${p.headcount || "—"}</td>
       <td>${escHtml(p.region || "—")}</td>
+      <td style="max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${websiteCellHtml(p.website)}</td>
+      <td>${phoneCellHtml(p.phone)}</td>
       <td>
         <button class="bl-fly-btn" data-lat="${f.geometry?.coordinates?.[1]}" data-lng="${f.geometry?.coordinates?.[0]}" style="font-size:9px;padding:2px 6px;border:1px solid #ccc;border-radius:3px;cursor:pointer;">Fly</button>
         <button class="bl-flag-btn ${flagCls}" data-nzbn="${escHtml(String(p.nzbn || ""))}" style="font-size:9px;padding:2px 6px;border:1px solid #ffcc80;border-radius:3px;cursor:pointer;">${flagged}</button>
